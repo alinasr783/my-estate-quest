@@ -23,15 +23,32 @@ interface SearchFilters {
 }
 
 const RESIDENTIAL_TYPES = [
-  "شقة", "فيلا", "دوبلكس", "بنتهاوس", "شاليه", "تاون هاوس", 
-  "توين هاوس", "غرفة", "أرض سكنية", "اي فيلا", "شقة فندقية", 
-  "كبينة", "سطح", "عقارات سكنية اخرى"
+  "شقة",
+  "فيلا", 
+  "بنتهاوس",
+  "دوبلكس",
+  "استوديو",
+  "غرفة وصالة",
+  "غرفتين وصالة",
+  "ثلاث غرف وصالة",
+  "أربع غرف وصالة",
+  "خمس غرف وصالة"
 ];
 
 const COMMERCIAL_TYPES = [
-  "مكتب", "مجمع تجاري", "مستودع", "عيادة", "مصنع", "جراج",
-  "مطعم و كافيه", "محلات تجارية", "زراعي", "صناعي", "أرض تجارية",
-  "صيدليه", "سطح", "وحدة طبية", "صالة عرض", "مكتب عمل جماعي", "عقارات تجارية اخرى"
+  "مكتب",
+  "محل تجاري",
+  "مستودع",
+  "معرض",
+  "عيادة",
+  "مطعم",
+  "فندق",
+  "مبنى كامل"
+];
+
+const PROPERTY_CATEGORIES = [
+  { value: "residential", label: "سكني" },
+  { value: "commercial", label: "تجاري" }
 ];
 
 interface PropertySearchProps {
@@ -52,6 +69,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
   });
 
   const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  const [propertyCategory, setPropertyCategory] = useState<string>("");
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -84,6 +102,15 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
 
   const handleSearch = () => {
     onSearch(filters);
+  };
+
+  const getPropertyTypeOptions = () => {
+    if (propertyCategory === "residential") {
+      return RESIDENTIAL_TYPES;
+    } else if (propertyCategory === "commercial") {
+      return COMMERCIAL_TYPES;
+    }
+    return [];
   };
 
   const getPropertyTypes = () => {
@@ -119,26 +146,58 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
             </Select>
           </div>
 
-          {/* نوع العقار */}
+          {/* فئة العقار */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
-              نوع العقار
+              فئة العقار
             </Label>
-            <Select 
-              value={filters.propertyType} 
-              onValueChange={(value) => setFilters({...filters, propertyType: value})}
+            <Select
+              value={propertyCategory}
+              onValueChange={(value) => {
+                setPropertyCategory(value);
+                setFilters({ ...filters, propertyType: "" }); // Reset property type when category changes
+              }}
             >
               <SelectTrigger className="bg-background/80">
-                <SelectValue placeholder="اختر نوع العقار" />
+                <SelectValue placeholder="اختر فئة العقار" />
               </SelectTrigger>
               <SelectContent>
-                {getPropertyTypes().map((type) => (
-                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                <SelectItem value="">جميع الفئات</SelectItem>
+                {PROPERTY_CATEGORIES.map((category) => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
+          {/* نوع العقار - يظهر فقط عند اختيار فئة */}
+          {propertyCategory && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Home className="h-4 w-4 text-primary" />
+                نوع العقار
+              </Label>
+              <Select
+                value={filters.propertyType}
+                onValueChange={(value) => setFilters({ ...filters, propertyType: value })}
+              >
+                <SelectTrigger className="bg-background/80">
+                  <SelectValue placeholder="اختر نوع العقار" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">جميع الأنواع</SelectItem>
+                  {getPropertyTypeOptions().map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* الموقع */}
           <div className="space-y-2">

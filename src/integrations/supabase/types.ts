@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          password: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          password: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          password?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_queue: {
         Row: {
           created_at: string
@@ -242,6 +266,79 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "property_templates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_visits: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          property_id: string
+          referrer: string | null
+          user_agent: string | null
+          user_email: string | null
+          user_name: string | null
+          visit_timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          property_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_name?: string | null
+          visit_timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          property_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_name?: string | null
+          visit_timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_visits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_wishlist: {
+        Row: {
+          created_at: string
+          id: string
+          property_id: string
+          user_email: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          property_id: string
+          user_email: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          property_id?: string
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_wishlist_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"

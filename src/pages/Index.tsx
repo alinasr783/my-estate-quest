@@ -4,12 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Star, MapPin, TrendingUp, Users, Home, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import PropertySearch from "@/components/PropertySearch";
 import PropertyCard from "@/components/PropertyCard";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AuthDialog from "@/components/AuthDialog";
 import { authService, type User } from "@/services/auth";
+import { wishlistService } from "@/services/wishlist";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-bg.jpg";
 
@@ -43,21 +45,30 @@ interface SearchFilters {
 export default function Index() {
   const [user, setUser] = useState<User | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [userWishlist, setUserWishlist] = useState<string[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchResults, setSearchResults] = useState<Property[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // تحميل المستخدم الحالي
+  // تحميل المستخدم الحالي وقائمة المفضلة
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
+      loadUserWishlist(currentUser.email);
     }
   }, []);
+
+  const loadUserWishlist = async (userEmail: string) => {
+    const result = await wishlistService.getUserWishlist(userEmail);
+    if (result.success && result.data) {
+      setUserWishlist(result.data);
+    }
+  };
 
   // تحميل العقارات المميزة
   useEffect(() => {
@@ -144,27 +155,58 @@ export default function Index() {
   const handleLoginSuccess = (loggedInUser: User) => {
     setUser(loggedInUser);
     setShowAuthDialog(false);
+    loadUserWishlist(loggedInUser.email);
   };
 
   const handleLogout = () => {
     authService.logout();
     setUser(null);
+    setUserWishlist([]);
     toast({
       title: "تم تسجيل الخروج",
       description: "نراك قريباً!",
     });
   };
 
-  const handleFavorite = (propertyId: string) => {
+  const handleFavorite = async (propertyId: string) => {
     if (!user) {
       setShowAuthDialog(true);
       return;
     }
     
-    toast({
-      title: "تمت الإضافة للمفضلة",
-      description: "تم إضافة العقار إلى قائمة المفضلة",
-    });
+    const isInWishlist = userWishlist.includes(propertyId);
+    
+    if (isInWishlist) {
+      const result = await wishlistService.removeFromWishlist(user.email, propertyId);
+      if (result.success) {
+        setUserWishlist(prev => prev.filter(id => id !== propertyId));
+        toast({
+          title: "تمت الإزالة من المفضلة",
+          description: "تم إزالة العقار من قائمة المفضلة",
+        });
+      } else {
+        toast({
+          title: "خطأ",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    } else {
+      const result = await wishlistService.addToWishlist(user.email, propertyId);
+      if (result.success) {
+        setUserWishlist(prev => [...prev, propertyId]);
+        toast({
+          title: "تمت الإضافة للمفضلة",
+          description: "تم إضافة العقار إلى قائمة المفضلة",
+        });
+      } else {
+        toast({
+          title: "خطأ",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const handleContact = (propertyId: string) => {
@@ -223,7 +265,7 @@ export default function Index() {
               </h1>
               
               <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto leading-relaxed">
-                أفضل العقارات في الإمارات العربية المتحدة بأسعار تنافسية وخدمة استثنائية
+                أفضل العقارات بأسعار تنافسية
               </p>
             </div>
 
@@ -290,6 +332,7 @@ export default function Index() {
                     onFavorite={handleFavorite}
                     onContact={handleContact}
                     onShare={handleShare}
+                    isFavorited={userWishlist.includes(property.id)}
                     imageIndex={index}
                   />
                 ))}
@@ -348,6 +391,7 @@ export default function Index() {
                     onFavorite={handleFavorite}
                     onContact={handleContact}
                     onShare={handleShare}
+                    isFavorited={userWishlist.includes(property.id)}
                     imageIndex={index}
                   />
                 ))}
@@ -391,7 +435,7 @@ export default function Index() {
         </div>
       </section>
 
-      <Footer onAdminClick={() => setShowAdminLogin(true)} />
+      <Footer onAdminClick={() => navigate('/admin')} />
 
       <AuthDialog
         open={showAuthDialog}
