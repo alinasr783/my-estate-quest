@@ -69,12 +69,11 @@ export default function Index() {
       const { data, error } = await supabase
         .from('properties')
         .select('id, title, description, price, currency, listing_type, property_type, location, city, area_sq_m, bedrooms, bathrooms')
-        .eq('status', 'active')
         .limit(6);
 
       if (error) throw error;
       
-      setFeaturedProperties((data as any) || []);
+      setFeaturedProperties(data || []);
     } catch (error) {
       console.error('Error loading featured properties:', error);
     } finally {
