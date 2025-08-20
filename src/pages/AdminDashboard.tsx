@@ -8,12 +8,14 @@ import { analyticsService } from "@/services/analytics";
 import { adminAuthService } from "@/services/adminAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { BarChart3, Download, Users, Eye, Calendar, ArrowLeft } from "lucide-react";
+import AddPropertyForm from "@/components/AddPropertyForm";
+import { BarChart3, Download, Users, Eye, Calendar, ArrowLeft, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
   const [visits, setVisits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddProperty, setShowAddProperty] = useState(false);
   const [stats, setStats] = useState({
     totalVisits: 0,
     uniqueUsers: 0,
@@ -146,11 +148,31 @@ export default function AdminDashboard() {
     );
   }
 
+  if (showAddProperty) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onLoginClick={() => {}} />
+        
+        <div className="container mx-auto px-4 py-8">
+          <AddPropertyForm
+            onSuccess={() => {
+              setShowAddProperty(false);
+              loadAnalytics();
+            }}
+            onCancel={() => setShowAddProperty(false)}
+          />
+        </div>
+        
+        <Footer onAdminClick={() => {}} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header onLoginClick={() => {}} />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -165,13 +187,20 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <Button 
+              onClick={() => setShowAddProperty(true)}
+              className="bg-gradient-primary hover:bg-gradient-accent animate-fade-in hover-scale"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              إضافة عقار
+            </Button>
+            <Button 
               onClick={handleExportToExcel}
-              className="bg-gradient-primary hover:bg-gradient-accent"
+              className="bg-gradient-primary hover:bg-gradient-accent hover-scale"
             >
               <Download className="h-4 w-4 mr-2" />
               تصدير Excel
             </Button>
-            <Button variant="outline" onClick={handleLogout}>
+            <Button variant="outline" onClick={handleLogout} className="hover-scale">
               تسجيل خروج
             </Button>
           </div>
@@ -179,7 +208,7 @@ export default function AdminDashboard() {
 
         {/* إحصائيات سريعة */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="animate-fade-in hover-scale transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">إجمالي الزيارات</CardTitle>
               <Eye className="h-4 w-4 text-muted-foreground" />
@@ -189,7 +218,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="animate-fade-in hover-scale transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">المستخدمون المسجلون</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -199,7 +228,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="animate-fade-in hover-scale transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">زيارات اليوم</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -209,7 +238,7 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="animate-fade-in hover-scale transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">العقارات المتتبعة</CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />

@@ -73,6 +73,12 @@ export default function Index() {
   // تحميل العقارات المميزة
   useEffect(() => {
     loadFeaturedProperties();
+    
+    // Check for existing user session
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      setUser(JSON.parse(currentUser));
+    }
   }, []);
 
   const loadFeaturedProperties = async () => {

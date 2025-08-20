@@ -36,16 +36,22 @@ interface PropertyCardProps {
   imageIndex?: number;
 }
 
-export default function PropertyCard({ 
-  property, 
-  onFavorite, 
-  onContact, 
-  onShare, 
+export default function PropertyCard({
+  property,
+  onFavorite,
+  onContact,
+  onShare,
   onDetailsClick,
   isFavorited = false,
   imageIndex = 0
 }: PropertyCardProps) {
   const [imageError, setImageError] = useState(false);
+  
+  const handleCardClick = () => {
+    if (onDetailsClick) {
+      onDetailsClick(property.id);
+    }
+  };
 
   const formatPrice = (price: number, currency: string) => {
     return new Intl.NumberFormat('ar-EG', {
