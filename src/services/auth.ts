@@ -62,10 +62,11 @@ export const authService = {
       });
 
       if (error) {
-        if (error.message.includes('duplicate') || error.message.includes('already exists')) {
+        console.error('Registration error:', error);
+        if (error.message.includes('duplicate') || error.message.includes('already exists') || error.message.includes('User already exists')) {
           return { success: false, error: "هذا البريد الإلكتروني مسجل مسبقاً" };
         }
-        return { success: false, error: "حدث خطأ أثناء إنشاء الحساب" };
+        return { success: false, error: error.message || "حدث خطأ أثناء إنشاء الحساب" };
       }
 
       const user = data[0];

@@ -57,13 +57,13 @@ interface PropertySearchProps {
 
 export default function PropertySearch({ onSearch }: PropertySearchProps) {
   const [filters, setFilters] = useState<SearchFilters>({
-    listingType: "",
-    propertyType: "",
-    location: "",
+    listingType: "all_types",
+    propertyType: "all_property_types",
+    location: "all_locations",
     minPrice: "",
     maxPrice: "",
-    bedrooms: "",
-    bathrooms: "",
+    bedrooms: "any_bedrooms",
+    bathrooms: "any_bathrooms",
     minArea: "",
     maxArea: ""
   });
@@ -97,6 +97,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
       ...filters,
       propertyType: filters.propertyType === "all_property_types" ? "" : filters.propertyType,
       listingType: filters.listingType === "all_types" ? "" : filters.listingType,
+      location: filters.location === "all_locations" ? "" : filters.location,
       bedrooms: filters.bedrooms === "any_bedrooms" ? "" : filters.bedrooms,
       bathrooms: filters.bathrooms === "any_bathrooms" ? "" : filters.bathrooms
     };

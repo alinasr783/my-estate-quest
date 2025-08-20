@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,12 +32,42 @@ const Properties = () => {
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedListingType, setSelectedListingType] = useState<string>("all");
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [selectedBedrooms, setSelectedBedrooms] = useState<string>("all");
+  const [selectedBathrooms, setSelectedBathrooms] = useState<string>("all");
   const { toast } = useToast();
+  const location = useLocation();
 
   useEffect(() => {
     document.documentElement.setAttribute('dir', 'rtl');
+    
+    // تطبيق الفلاتر من URL parameters
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('listingType')) {
+      setSelectedListingType(searchParams.get('listingType') || 'all');
+    }
+    if (searchParams.get('propertyType')) {
+      setSelectedType(searchParams.get('propertyType') || 'all');
+    }
+    if (searchParams.get('location')) {
+      setSearchTerm(searchParams.get('location') || '');
+    }
+    if (searchParams.get('minPrice')) {
+      setMinPrice(searchParams.get('minPrice') || '');
+    }
+    if (searchParams.get('maxPrice')) {
+      setMaxPrice(searchParams.get('maxPrice') || '');
+    }
+    if (searchParams.get('bedrooms')) {
+      setSelectedBedrooms(searchParams.get('bedrooms') || 'all');
+    }
+    if (searchParams.get('bathrooms')) {
+      setSelectedBathrooms(searchParams.get('bathrooms') || 'all');
+    }
+    
     loadProperties();
-  }, []);
+  }, [location.search]);
 
   const loadProperties = async () => {
     try {
@@ -64,7 +95,18 @@ const Properties = () => {
     const matchesType = selectedType === "all" || property.property_type === selectedType;
     const matchesListingType = selectedListingType === "all" || property.listing_type === selectedListingType;
     
-    return matchesSearch && matchesCity && matchesType && matchesListingType;
+    // فلتر السعر
+    const matchesMinPrice = !minPrice || property.price >= parseFloat(minPrice);
+    const matchesMaxPrice = !maxPrice || property.price <= parseFloat(maxPrice);
+    
+    // فلتر غرف النوم والحمامات
+    const matchesBedrooms = selectedBedrooms === "all" || 
+      (selectedBedrooms === "5+" ? property.bedrooms >= 5 : property.bedrooms === parseInt(selectedBedrooms));
+    const matchesBathrooms = selectedBathrooms === "all" || 
+      (selectedBathrooms === "4+" ? property.bathrooms >= 4 : property.bathrooms === parseInt(selectedBathrooms));
+    
+    return matchesSearch && matchesCity && matchesType && matchesListingType && 
+           matchesMinPrice && matchesMaxPrice && matchesBedrooms && matchesBathrooms;
   });
 
   const handleFavorite = (propertyId: string) => {
@@ -106,7 +148,7 @@ const Properties = () => {
 
         {/* Search and Filters */}
         <div className="bg-card rounded-lg p-6 mb-8 shadow-soft">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-4">
             <Input
               placeholder="ابحث عن العقارات..."
               value={searchTerm}
@@ -120,14 +162,13 @@ const Properties = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع المدن</SelectItem>
-                <SelectItem value="القاهرة">القاهرة</SelectItem>
-                <SelectItem value="الجيزة">الجيزة</SelectItem>
-                <SelectItem value="الإسكندرية">الإسكندرية</SelectItem>
-                <SelectItem value="المنصورة">المنصورة</SelectItem>
-                <SelectItem value="طنطا">طنطا</SelectItem>
-                <SelectItem value="أسوان">أسوان</SelectItem>
-                <SelectItem value="الأقصر">الأقصر</SelectItem>
-                <SelectItem value="بورسعيد">بورسعيد</SelectItem>
+                <SelectItem value="دبي">دبي</SelectItem>
+                <SelectItem value="أبوظبي">أبوظبي</SelectItem>
+                <SelectItem value="الشارقة">الشارقة</SelectItem>
+                <SelectItem value="عجمان">عجمان</SelectItem>
+                <SelectItem value="أم القيوين">أم القيوين</SelectItem>
+                <SelectItem value="رأس الخيمة">رأس الخيمة</SelectItem>
+                <SelectItem value="الفجيرة">الفجيرة</SelectItem>
               </SelectContent>
             </Select>
 
@@ -137,34 +178,24 @@ const Properties = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع الأنواع</SelectItem>
+                <SelectItem value="شقة">شقة</SelectItem>
                 <SelectItem value="فيلا">فيلا</SelectItem>
-                <SelectItem value="دوبلكس">دوبلكس</SelectItem>
                 <SelectItem value="بنتهاوس">بنتهاوس</SelectItem>
-                <SelectItem value="شاليه">شاليه</SelectItem>
-                <SelectItem value="تاون هاوس">تاون هاوس</SelectItem>
-                <SelectItem value="توين هاوس">توين هاوس</SelectItem>
-                <SelectItem value="غرفة">غرفة</SelectItem>
-                <SelectItem value="أرض سكنية">أرض سكنية</SelectItem>
-                <SelectItem value="اي فيلا">اي فيلا</SelectItem>
-                <SelectItem value="شقة فندقية">شقة فندقية</SelectItem>
-                <SelectItem value="كبينة">كبينة</SelectItem>
-                <SelectItem value="سطح">سطح</SelectItem>
-                <SelectItem value="عقارات سكنية اخرى">عقارات سكنية اخرى</SelectItem>
+                <SelectItem value="دوبلكس">دوبلكس</SelectItem>
+                <SelectItem value="استوديو">استوديو</SelectItem>
+                <SelectItem value="غرفة وصالة">غرفة وصالة</SelectItem>
+                <SelectItem value="غرفتين وصالة">غرفتين وصالة</SelectItem>
+                <SelectItem value="ثلاث غرف وصالة">ثلاث غرف وصالة</SelectItem>
+                <SelectItem value="أربع غرف وصالة">أربع غرف وصالة</SelectItem>
+                <SelectItem value="خمس غرف وصالة">خمس غرف وصالة</SelectItem>
                 <SelectItem value="مكتب">مكتب</SelectItem>
-                <SelectItem value="مجمع تجاري">مجمع تجاري</SelectItem>
+                <SelectItem value="محل تجاري">محل تجاري</SelectItem>
                 <SelectItem value="مستودع">مستودع</SelectItem>
+                <SelectItem value="معرض">معرض</SelectItem>
                 <SelectItem value="عيادة">عيادة</SelectItem>
-                <SelectItem value="مصنع">مصنع</SelectItem>
-                <SelectItem value="جراج">جراج</SelectItem>
-                <SelectItem value="مطعم و كافيه">مطعم و كافيه</SelectItem>
-                <SelectItem value="محلات تجارية">محلات تجارية</SelectItem>
-                <SelectItem value="زراعي">زراعي</SelectItem>
-                <SelectItem value="صناعي">صناعي</SelectItem>
-                <SelectItem value="أرض تجارية">أرض تجارية</SelectItem>
-                <SelectItem value="صيدليه">صيدليه</SelectItem>
-                <SelectItem value="وحدة طبية">وحدة طبية</SelectItem>
-                <SelectItem value="صالة عرض">صالة عرض</SelectItem>
-                <SelectItem value="مكتب عمل جماعي">مكتب عمل جماعي</SelectItem>
+                <SelectItem value="مطعم">مطعم</SelectItem>
+                <SelectItem value="فندق">فندق</SelectItem>
+                <SelectItem value="مبنى كامل">مبنى كامل</SelectItem>
               </SelectContent>
             </Select>
 
@@ -176,6 +207,52 @@ const Properties = () => {
                 <SelectItem value="all">جميع العروض</SelectItem>
                 <SelectItem value="للبيع">للبيع</SelectItem>
                 <SelectItem value="للإيجار">للإيجار</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* الصف الثاني - مرشحات إضافية */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Input
+              type="number"
+              placeholder="السعر من (درهم)"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-full"
+            />
+            
+            <Input
+              type="number"
+              placeholder="السعر إلى (درهم)"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="w-full"
+            />
+            
+            <Select value={selectedBedrooms} onValueChange={setSelectedBedrooms}>
+              <SelectTrigger>
+                <SelectValue placeholder="غرف النوم" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">أي عدد</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="5+">5+</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={selectedBathrooms} onValueChange={setSelectedBathrooms}>
+              <SelectTrigger>
+                <SelectValue placeholder="الحمامات" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">أي عدد</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4+">4+</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -226,6 +303,10 @@ const Properties = () => {
                 setSelectedCity("all");
                 setSelectedType("all");
                 setSelectedListingType("all");
+                setMinPrice("");
+                setMaxPrice("");
+                setSelectedBedrooms("all");
+                setSelectedBathrooms("all");
               }}
               variant="outline"
             >

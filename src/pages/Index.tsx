@@ -99,63 +99,39 @@ export default function Index() {
   };
 
   const handleSearch = async (filters: SearchFilters) => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('properties')
-        .select('*');
-
-      // تطبيق الفلاتر
-      if (filters.listingType) {
-        query = query.eq('listing_type', filters.listingType);
-      }
-      if (filters.propertyType) {
-        query = query.eq('property_type', filters.propertyType);
-      }
-      if (filters.location) {
-        query = query.ilike('location', `%${filters.location}%`);
-      }
-      if (filters.minPrice) {
-        query = query.gte('price', parseFloat(filters.minPrice));
-      }
-      if (filters.maxPrice) {
-        query = query.lte('price', parseFloat(filters.maxPrice));
-      }
-      if (filters.bedrooms) {
-        query = query.eq('bedrooms', parseInt(filters.bedrooms));
-      }
-      if (filters.bathrooms) {
-        query = query.eq('bathrooms', parseInt(filters.bathrooms));
-      }
-      if (filters.minArea) {
-        query = query.gte('area_sq_m', parseFloat(filters.minArea));
-      }
-      if (filters.maxArea) {
-        query = query.lte('area_sq_m', parseFloat(filters.maxArea));
-      }
-
-      const { data, error } = await query.limit(20);
-
-      if (error) throw error;
-      
-      setSearchResults((data as any) || []);
-      setHasSearched(true);
-      
-      toast({
-        title: "تم البحث بنجاح",
-        description: `تم العثور على ${data?.length || 0} عقار`,
-      });
-
-    } catch (error) {
-      console.error('Error searching properties:', error);
-      toast({
-        title: "خطأ في البحث",
-        description: "حدث خطأ أثناء البحث عن العقارات",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    // إذا تم البحث من الصفحة الرئيسية، الانتقال لصفحة العقارات مع الفلاتر
+    const searchParams = new URLSearchParams();
+    
+    if (filters.listingType && filters.listingType !== 'all_types') {
+      searchParams.set('listingType', filters.listingType);
     }
+    if (filters.propertyType && filters.propertyType !== 'all_property_types') {
+      searchParams.set('propertyType', filters.propertyType);
+    }
+    if (filters.location && filters.location !== 'all_locations') {
+      searchParams.set('location', filters.location);
+    }
+    if (filters.bedrooms && filters.bedrooms !== 'any_bedrooms') {
+      searchParams.set('bedrooms', filters.bedrooms);
+    }
+    if (filters.bathrooms && filters.bathrooms !== 'any_bathrooms') {
+      searchParams.set('bathrooms', filters.bathrooms);
+    }
+    if (filters.minPrice) {
+      searchParams.set('minPrice', filters.minPrice);
+    }
+    if (filters.maxPrice) {
+      searchParams.set('maxPrice', filters.maxPrice);
+    }
+    if (filters.minArea) {
+      searchParams.set('minArea', filters.minArea);
+    }
+    if (filters.maxArea) {
+      searchParams.set('maxArea', filters.maxArea);
+    }
+    
+    // الانتقال لصفحة العقارات مع الفلاتر
+    navigate(`/properties?${searchParams.toString()}`);
   };
 
   const handleLoginSuccess = (loggedInUser: User) => {

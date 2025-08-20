@@ -50,6 +50,12 @@ export default function AdminDashboard() {
 
       if (error) throw error;
       setProperties(data || []);
+      
+      // تحديث الإحصائيات بعد تحميل العقارات
+      setStats(prev => ({
+        ...prev,
+        totalProperties: data?.length || 0
+      }));
     } catch (error) {
       console.error('Error loading properties:', error);
     }
