@@ -1,19 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Bed, Bath, Square } from "lucide-react";
-import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import property1 from "@/assets/property-1.jpg";
-import property2 from "@/assets/property-2.jpg";
-import property3 from "@/assets/property-3.jpg";
-import property4 from "@/assets/property-4.jpg";
-import property5 from "@/assets/property-5.jpg";
+import PropertyCard from "@/components/PropertyCard";
+import { useToast } from "@/hooks/use-toast";
 
 interface Property {
   id: string;
@@ -30,8 +24,6 @@ interface Property {
   listing_type: string;
 }
 
-const propertyImages = [property1, property2, property3, property4, property5];
-
 const Properties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +31,7 @@ const Properties = () => {
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedListingType, setSelectedListingType] = useState<string>("all");
+  const { toast } = useToast();
 
   useEffect(() => {
     document.documentElement.setAttribute('dir', 'rtl');
@@ -74,16 +67,31 @@ const Properties = () => {
     return matchesSearch && matchesCity && matchesType && matchesListingType;
   });
 
-  const formatPrice = (price: number, currency: string) => {
-    return new Intl.NumberFormat('ar-EG', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-    }).format(price);
+  const handleFavorite = (propertyId: string) => {
+    toast({
+      title: "تمت الإضافة للمفضلة",
+      description: "تم إضافة العقار إلى قائمة المفضلة",
+    });
   };
 
-  const getPropertyImage = (index: number) => {
-    return propertyImages[index % propertyImages.length];
+  const handleContact = (propertyId: string) => {
+    toast({
+      title: "تم التسجيل",
+      description: "سيتم التواصل معك قريباً",
+    });
+  };
+
+  const handleShare = (propertyId: string) => {
+    navigator.share?.({
+      title: "عقار من العقارات الذهبية",
+      url: window.location.href
+    }).catch(() => {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "تم النسخ",
+        description: "تم نسخ رابط العقار",
+      });
+    });
   };
 
   return (
@@ -129,11 +137,34 @@ const Properties = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">جميع الأنواع</SelectItem>
-                <SelectItem value="شقة">شقة</SelectItem>
                 <SelectItem value="فيلا">فيلا</SelectItem>
+                <SelectItem value="دوبلكس">دوبلكس</SelectItem>
+                <SelectItem value="بنتهاوس">بنتهاوس</SelectItem>
+                <SelectItem value="شاليه">شاليه</SelectItem>
                 <SelectItem value="تاون هاوس">تاون هاوس</SelectItem>
-                <SelectItem value="بنت هاوس">بنت هاوس</SelectItem>
-                <SelectItem value="استوديو">استوديو</SelectItem>
+                <SelectItem value="توين هاوس">توين هاوس</SelectItem>
+                <SelectItem value="غرفة">غرفة</SelectItem>
+                <SelectItem value="أرض سكنية">أرض سكنية</SelectItem>
+                <SelectItem value="اي فيلا">اي فيلا</SelectItem>
+                <SelectItem value="شقة فندقية">شقة فندقية</SelectItem>
+                <SelectItem value="كبينة">كبينة</SelectItem>
+                <SelectItem value="سطح">سطح</SelectItem>
+                <SelectItem value="عقارات سكنية اخرى">عقارات سكنية اخرى</SelectItem>
+                <SelectItem value="مكتب">مكتب</SelectItem>
+                <SelectItem value="مجمع تجاري">مجمع تجاري</SelectItem>
+                <SelectItem value="مستودع">مستودع</SelectItem>
+                <SelectItem value="عيادة">عيادة</SelectItem>
+                <SelectItem value="مصنع">مصنع</SelectItem>
+                <SelectItem value="جراج">جراج</SelectItem>
+                <SelectItem value="مطعم و كافيه">مطعم و كافيه</SelectItem>
+                <SelectItem value="محلات تجارية">محلات تجارية</SelectItem>
+                <SelectItem value="زراعي">زراعي</SelectItem>
+                <SelectItem value="صناعي">صناعي</SelectItem>
+                <SelectItem value="أرض تجارية">أرض تجارية</SelectItem>
+                <SelectItem value="صيدليه">صيدليه</SelectItem>
+                <SelectItem value="وحدة طبية">وحدة طبية</SelectItem>
+                <SelectItem value="صالة عرض">صالة عرض</SelectItem>
+                <SelectItem value="مكتب عمل جماعي">مكتب عمل جماعي</SelectItem>
               </SelectContent>
             </Select>
 
@@ -174,57 +205,14 @@ const Properties = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProperties.map((property, index) => (
-              <Card key={property.id} className="overflow-hidden hover:shadow-medium transition-shadow duration-300">
-                <div className="relative">
-                  <img
-                    src={getPropertyImage(index)}
-                    alt={property.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="absolute top-4 right-4">
-                    <Badge variant="secondary" className="bg-background/80 text-foreground">
-                      {property.listing_type}
-                    </Badge>
-                  </div>
-                </div>
-                
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg line-clamp-2">{property.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">{property.description}</CardDescription>
-                </CardHeader>
-                
-                <CardContent className="pt-0">
-                  <div className="flex items-center text-muted-foreground mb-3">
-                    <MapPin className="w-4 h-4 ml-1" />
-                    <span className="text-sm">{property.location}, {property.city}</span>
-                  </div>
-                  
-                  <div className="text-2xl font-bold text-primary mb-4">
-                    {formatPrice(property.price, property.currency)}
-                  </div>
-                  
-                  <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <Bed className="w-4 h-4 ml-1" />
-                      <span>{property.bedrooms}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Bath className="w-4 h-4 ml-1" />
-                      <span>{property.bathrooms}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Square className="w-4 h-4 ml-1" />
-                      <span>{property.area_sq_m} م²</span>
-                    </div>
-                  </div>
-                  
-                  <Link to={`/property/${property.id}`}>
-                    <Button className="w-full">
-                      عرض التفاصيل
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onFavorite={handleFavorite}
+                onContact={handleContact}
+                onShare={handleShare}
+                imageIndex={index}
+              />
             ))}
           </div>
         )}

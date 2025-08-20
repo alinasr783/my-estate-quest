@@ -283,13 +283,14 @@ export default function Index() {
 
             {searchResults.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map((property) => (
+                {searchResults.map((property, index) => (
                   <PropertyCard
                     key={property.id}
                     property={property}
                     onFavorite={handleFavorite}
                     onContact={handleContact}
                     onShare={handleShare}
+                    imageIndex={index}
                   />
                 ))}
               </div>
@@ -340,13 +341,14 @@ export default function Index() {
               </div>
             ) : featuredProperties.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredProperties.map((property) => (
+                {featuredProperties.map((property, index) => (
                   <PropertyCard
                     key={property.id}
                     property={property}
                     onFavorite={handleFavorite}
                     onContact={handleContact}
                     onShare={handleShare}
+                    imageIndex={index}
                   />
                 ))}
               </div>
