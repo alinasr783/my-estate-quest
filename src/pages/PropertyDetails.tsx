@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Bed, Bath, Square, ArrowLeft, Phone, MessageCircle, Share2, Heart } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { MapPin, Bed, Bath, Square, ArrowLeft, Phone, MessageCircle, Share2, Heart, Car, TreePine, Dumbbell, Shield, Waves, Building, Calendar, User, MapIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +29,31 @@ interface Property {
   area_sq_m: number;
   property_type: string;
   listing_type: string;
+  parking?: number;
+  balcony?: number;
+  furnished?: boolean;
+  elevator?: boolean;
+  garden?: boolean;
+  pool?: boolean;
+  security?: boolean;
+  gym?: boolean;
+  latitude?: number;
+  longitude?: number;
+  floor_number?: number;
+  total_floors?: number;
+  year_built?: number;
+  agent_name?: string;
+  agent_phone?: string;
+  agent_whatsapp?: string;
+  features?: string[];
+  nearby_places?: string[];
+}
+
+interface PropertyImage {
+  id: string;
+  path: string;
+  public_url?: string;
+  order: number;
 }
 
 const propertyImages = [property1, property2, property3, property4, property5];
@@ -35,6 +61,7 @@ const propertyImages = [property1, property2, property3, property4, property5];
 const PropertyDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<Property | null>(null);
+  const [propertyImages, setPropertyImages] = useState<PropertyImage[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -51,10 +78,20 @@ const PropertyDetails = () => {
         .from('properties')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
-      setProperty(data);
+      if (data) setProperty(data);
+
+      // Load property images
+      const { data: images, error: imagesError } = await supabase
+        .from('property_images')
+        .select('*')
+        .eq('property_id', id)
+        .order('order');
+      
+      if (imagesError) throw imagesError;
+      setPropertyImages(images || []);
     } catch (error) {
       console.error('Error loading property:', error);
       toast({
@@ -76,17 +113,20 @@ const PropertyDetails = () => {
   };
 
   const getPropertyImage = () => {
+    const images = [property1, property2, property3, property4, property5];
     const hash = property?.id.charCodeAt(0) || 0;
-    return propertyImages[hash % propertyImages.length];
+    return images[hash % images.length];
   };
 
   const handleWhatsApp = () => {
     const message = `مرحباً، أنا مهتم بالعقار: ${property?.title}`;
-    window.open(`https://wa.me/201234567890?text=${encodeURIComponent(message)}`, '_blank');
+    const phone = property?.agent_whatsapp || property?.agent_phone || '+201234567890';
+    window.open(`https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const handleCall = () => {
-    window.open('tel:+201234567890', '_self');
+    const phone = property?.agent_phone || '+201234567890';
+    window.open(`tel:${phone}`, '_self');
   };
 
   const handleShare = () => {
@@ -164,18 +204,48 @@ const PropertyDetails = () => {
           </Link>
         </div>
 
-        {/* Main Image */}
+        {/* Image Gallery */}
         <div className="relative mb-8">
-          <img
-            src={getPropertyImage()}
-            alt={property.title}
-            className="w-full h-96 object-cover rounded-lg"
-          />
-          <div className="absolute top-4 right-4">
-            <Badge variant="secondary" className="bg-background/80 text-foreground">
-              {property.listing_type}
-            </Badge>
-          </div>
+          {propertyImages.length > 0 ? (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {propertyImages.map((image, index) => (
+                  <CarouselItem key={image.id}>
+                    <div className="relative">
+                      <img
+                        src={image.public_url || getPropertyImage()}
+                        alt={`${property.title} - صورة ${index + 1}`}
+                        className="w-full h-96 object-cover rounded-lg"
+                      />
+                      {index === 0 && (
+                        <div className="absolute top-4 right-4">
+                          <Badge variant="secondary" className="bg-background/80 text-foreground">
+                            {property.listing_type}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-4" />
+              <CarouselNext className="right-4" />
+            </Carousel>
+          ) : (
+            <div className="relative">
+              <img
+                src={getPropertyImage()}
+                alt={property.title}
+                className="w-full h-96 object-cover rounded-lg"
+              />
+              <div className="absolute top-4 right-4">
+                <Badge variant="secondary" className="bg-background/80 text-foreground">
+                  {property.listing_type}
+                </Badge>
+              </div>
+            </div>
+          )}
+          
           <div className="absolute top-4 left-4 flex gap-2">
             <Button
               size="icon"
@@ -194,6 +264,14 @@ const PropertyDetails = () => {
               <Share2 className="w-4 h-4" />
             </Button>
           </div>
+          
+          {propertyImages.length > 1 && (
+            <div className="absolute bottom-4 right-4">
+              <Badge variant="secondary" className="bg-background/90">
+                {propertyImages.length} صور
+              </Badge>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -213,7 +291,7 @@ const PropertyDetails = () => {
             <Separator className="mb-6" />
 
             {/* Property Features */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
               <Card className="text-center p-4">
                 <Bed className="w-8 h-8 mx-auto text-primary mb-2" />
                 <div className="text-2xl font-bold">{property.bedrooms}</div>
@@ -229,7 +307,63 @@ const PropertyDetails = () => {
                 <div className="text-2xl font-bold">{property.area_sq_m}</div>
                 <div className="text-sm text-muted-foreground">متر مربع</div>
               </Card>
+              {property.parking && property.parking > 0 && (
+                <Card className="text-center p-4">
+                  <Car className="w-8 h-8 mx-auto text-primary mb-2" />
+                  <div className="text-2xl font-bold">{property.parking}</div>
+                  <div className="text-sm text-muted-foreground">مواقف سيارات</div>
+                </Card>
+              )}
             </div>
+
+            {/* Additional Features Grid */}
+            {(property.furnished || property.elevator || property.garden || property.pool || property.security || property.gym) && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle>الميزات والخدمات</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {property.furnished && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        مفروش
+                      </div>
+                    )}
+                    {property.elevator && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Building className="w-4 h-4 text-primary" />
+                        مصعد
+                      </div>
+                    )}
+                    {property.garden && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <TreePine className="w-4 h-4 text-primary" />
+                        حديقة
+                      </div>
+                    )}
+                    {property.pool && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Waves className="w-4 h-4 text-primary" />
+                        مسبح
+                      </div>
+                    )}
+                    {property.security && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Shield className="w-4 h-4 text-primary" />
+                        أمن وحراسة
+                      </div>
+                    )}
+                    {property.gym && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Dumbbell className="w-4 h-4 text-primary" />
+                        صالة رياضية
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Description */}
             <Card>
@@ -268,8 +402,107 @@ const PropertyDetails = () => {
                   <span className="text-muted-foreground">الموقع:</span>
                   <span className="font-medium">{property.location}</span>
                 </div>
+                {property.floor_number && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">الطابق:</span>
+                      <span className="font-medium">{property.floor_number} من {property.total_floors}</span>
+                    </div>
+                  </>
+                )}
+                {property.year_built && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">سنة البناء:</span>
+                      <span className="font-medium">{property.year_built}</span>
+                    </div>
+                  </>
+                )}
+                {property.balcony && property.balcony > 0 && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">الشرفات:</span>
+                      <span className="font-medium">{property.balcony}</span>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
+
+            {/* Features */}
+            {property.features && property.features.length > 0 && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>مميزات إضافية</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {property.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2 text-sm">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Nearby Places */}
+            {property.nearby_places && property.nearby_places.length > 0 && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>الأماكن القريبة</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {property.nearby_places.map((place, index) => (
+                      <div key={index} className="flex items-center gap-2 text-sm">
+                        <MapPin className="w-4 h-4 text-primary" />
+                        {place}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Google Map */}
+            {property.latitude && property.longitude && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapIcon className="w-5 h-5" />
+                    الموقع على الخريطة
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="w-full h-64 rounded-lg overflow-hidden">
+                    <iframe
+                      src={`https://maps.google.com/maps?q=${property.latitude},${property.longitude}&hl=ar&z=15&output=embed`}
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => window.open(`https://maps.google.com?q=${property.latitude},${property.longitude}`, '_blank')}
+                    >
+                      فتح في خرائط جوجل
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Contact Card */}
@@ -282,6 +515,16 @@ const PropertyDetails = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {property.agent_name && (
+                  <div className="text-center border-b pb-4">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <User className="w-4 h-4 text-primary" />
+                      <span className="font-semibold">{property.agent_name}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">وكيل العقار</p>
+                  </div>
+                )}
+                
                 <Button onClick={handleCall} className="w-full flex items-center gap-2">
                   <Phone className="w-4 h-4" />
                   اتصل الآن
@@ -295,8 +538,15 @@ const PropertyDetails = () => {
                 
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">رقم الهاتف</p>
-                  <p className="font-medium">+20 123 456 7890</p>
+                  <p className="font-medium">{property.agent_phone || '+20 123 456 7890'}</p>
                 </div>
+                
+                {property.agent_whatsapp && property.agent_whatsapp !== property.agent_phone && (
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-2">واتساب</p>
+                    <p className="font-medium">{property.agent_whatsapp}</p>
+                  </div>
+                )}
                 
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-2">ساعات العمل</p>

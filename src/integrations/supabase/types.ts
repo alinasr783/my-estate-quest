@@ -67,55 +67,109 @@ export type Database = {
       }
       properties: {
         Row: {
+          agent_name: string | null
+          agent_phone: string | null
+          agent_whatsapp: string | null
           area_sq_m: number | null
+          balcony: number | null
           bathrooms: number | null
           bedrooms: number | null
           city: string | null
           created_at: string
           currency: string | null
           description: string | null
+          elevator: boolean | null
+          features: string[] | null
+          floor_number: number | null
+          furnished: boolean | null
+          garden: boolean | null
+          gym: boolean | null
           id: string
+          latitude: number | null
           listing_type: string | null
           location: string | null
+          longitude: number | null
+          nearby_places: string[] | null
+          parking: number | null
+          pool: boolean | null
           price: number | null
           property_type: string | null
+          security: boolean | null
           source_row: Json | null
           title: string | null
+          total_floors: number | null
           updated_at: string
+          year_built: number | null
         }
         Insert: {
+          agent_name?: string | null
+          agent_phone?: string | null
+          agent_whatsapp?: string | null
           area_sq_m?: number | null
+          balcony?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           city?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
+          elevator?: boolean | null
+          features?: string[] | null
+          floor_number?: number | null
+          furnished?: boolean | null
+          garden?: boolean | null
+          gym?: boolean | null
           id?: string
+          latitude?: number | null
           listing_type?: string | null
           location?: string | null
+          longitude?: number | null
+          nearby_places?: string[] | null
+          parking?: number | null
+          pool?: boolean | null
           price?: number | null
           property_type?: string | null
+          security?: boolean | null
           source_row?: Json | null
           title?: string | null
+          total_floors?: number | null
           updated_at?: string
+          year_built?: number | null
         }
         Update: {
+          agent_name?: string | null
+          agent_phone?: string | null
+          agent_whatsapp?: string | null
           area_sq_m?: number | null
+          balcony?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           city?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
+          elevator?: boolean | null
+          features?: string[] | null
+          floor_number?: number | null
+          furnished?: boolean | null
+          garden?: boolean | null
+          gym?: boolean | null
           id?: string
+          latitude?: number | null
           listing_type?: string | null
           location?: string | null
+          longitude?: number | null
+          nearby_places?: string[] | null
+          parking?: number | null
+          pool?: boolean | null
           price?: number | null
           property_type?: string | null
+          security?: boolean | null
           source_row?: Json | null
           title?: string | null
+          total_floors?: number | null
           updated_at?: string
+          year_built?: number | null
         }
         Relationships: []
       }

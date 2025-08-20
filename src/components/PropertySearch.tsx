@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Home, Building2, Bed, Bath, Ruler } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { supabase } from "@/integrations/supabase/client";
+import { Search, MapPin, Home, Building2, Bed, Bath, Ruler, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SearchFilters {
   listingType: string;
@@ -46,6 +50,37 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
     minArea: "",
     maxArea: ""
   });
+
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    loadAvailableLocations();
+  }, []);
+
+  const loadAvailableLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('location, city')
+        .not('location', 'is', null)
+        .not('city', 'is', null);
+      
+      if (error) throw error;
+      
+      const locations = Array.from(new Set(
+        data.flatMap(property => [
+          property.location,
+          property.city,
+          `${property.location}, ${property.city}`
+        ])
+      )).filter(Boolean);
+      
+      setAvailableLocations(locations);
+    } catch (error) {
+      console.error('Error loading locations:', error);
+    }
+  };
 
   const handleSearch = () => {
     onSearch(filters);
@@ -111,12 +146,47 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
               <MapPin className="h-4 w-4 text-primary" />
               الموقع
             </Label>
-            <Input
-              placeholder="المدينة أو المنطقة"
-              value={filters.location}
-              onChange={(e) => setFilters({...filters, location: e.target.value})}
-              className="bg-background/80"
-            />
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between bg-background/80"
+                >
+                  {filters.location || "اختر الموقع..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="ابحث عن موقع..." />
+                  <CommandList>
+                    <CommandEmpty>لا توجد مواقع متاحة.</CommandEmpty>
+                    <CommandGroup>
+                      {availableLocations.map((location) => (
+                        <CommandItem
+                          key={location}
+                          value={location}
+                          onSelect={(currentValue) => {
+                            setFilters({...filters, location: currentValue === filters.location ? "" : currentValue});
+                            setOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              filters.location === location ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {location}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
