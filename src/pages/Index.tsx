@@ -220,7 +220,7 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <Header 
         user={user}
-        onLoginClick={() => setShowAuthDialog(true)}
+        onLoginClick={() => navigate('/auth')}
         onLogout={handleLogout}
       />
 
