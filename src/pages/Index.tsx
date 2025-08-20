@@ -244,91 +244,28 @@ export default function Index() {
 
       {/* Hero Section */}
       <section 
-        className="relative min-h-[95vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/60 to-black/40" />
         
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-20 w-20 h-20 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
-          <div className="absolute bottom-40 right-32 w-32 h-32 bg-accent/20 rounded-full blur-xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-primary/10 rounded-full blur-lg animate-pulse delay-500"></div>
-        </div>
-        
         <div className="relative z-10 container mx-auto px-4 text-center">
-          <div className="max-w-5xl mx-auto space-y-8">
+          <div className="max-w-6xl mx-auto space-y-12">
             <div className="space-y-6 animate-fade-in">
-              <Badge className="bg-gradient-accent text-accent-foreground px-8 py-3 text-base font-medium shadow-glow animate-pulse">
-                <Sparkles className="w-5 h-5 mr-2" />
-                العقارات الذهبية
-              </Badge>
-              
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight animate-scale-in">
-                اكتشف عقارك
-                <span className="block bg-gradient-accent bg-clip-text text-transparent animate-pulse">
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold text-white leading-tight">
+                ابحث عن عقارك
+                <span className="block bg-gradient-accent bg-clip-text text-transparent">
                   المثالي
                 </span>
               </h1>
-              
-              <p className="text-2xl md:text-3xl text-gray-200 max-w-3xl mx-auto leading-relaxed font-light">
-                أفضل العقارات بأسعار تنافسية
-              </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-6 text-white/90 animate-fade-in delay-300">
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center">
-                  <Star className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <span className="font-medium">عقارات مميزة</span>
-              </div>
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <span className="font-medium">أسعار تنافسية</span>
-              </div>
-              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                <div className="w-10 h-10 bg-gradient-accent rounded-full flex items-center justify-center">
-                  <Users className="w-5 h-5 text-accent-foreground" />
-                </div>
-                <span className="font-medium">خدمة متميزة</span>
-              </div>
-            </div>
-
-            <div className="space-y-6 animate-fade-in delay-500">
-              <div className="max-w-3xl mx-auto backdrop-blur-md bg-white/10 rounded-2xl p-2 shadow-2xl border border-white/20">
+            {/* Search Form - Full Width */}
+            <div className="w-full max-w-none animate-fade-in delay-300">
+              <div className="backdrop-blur-lg bg-white/10 rounded-3xl p-6 md:p-8 shadow-2xl border border-white/20">
                 <PropertySearch onSearch={handleSearch} />
               </div>
-              
-              <div className="flex flex-wrap justify-center gap-4">
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg"
-                  onClick={() => handleSearch({} as SearchFilters)}
-                >
-                  <Search className="w-5 h-5 mr-2" />
-                  تصفح جميع العقارات
-                </Button>
-                
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-accent hover:bg-accent/90 shadow-glow transition-all duration-300 hover:scale-105"
-                >
-                  <MapPin className="w-5 h-5 mr-2" />
-                  العقارات القريبة مني
-                </Button>
-              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </section>
@@ -348,18 +285,21 @@ export default function Index() {
             </div>
 
             {searchResults.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map((property, index) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    onFavorite={handleFavorite}
-                    onContact={handleContact}
-                    onShare={handleShare}
-                    isFavorited={userWishlist.includes(property.id)}
-                    imageIndex={index}
-                  />
-                ))}
+              <div className="flex justify-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl">
+                  {searchResults.map((property, index) => (
+                    <div key={property.id} className="w-full max-w-sm mx-auto">
+                      <PropertyCard
+                        property={property}
+                        onFavorite={handleFavorite}
+                        onContact={handleContact}
+                        onShare={handleShare}
+                        isFavorited={userWishlist.includes(property.id)}
+                        imageIndex={index}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : hasSearched ? (
               <Card className="p-8 text-center">
@@ -384,15 +324,11 @@ export default function Index() {
         <section className="py-20 bg-gradient-to-br from-background via-muted/20 to-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16 space-y-4">
-              <Badge className="bg-gradient-accent text-accent-foreground mb-6 px-6 py-2 text-sm font-medium shadow-glow">
-                <Sparkles className="w-4 h-4 mr-2" />
-                مميز
-              </Badge>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-primary bg-clip-text text-transparent">
                 العقارات المميزة
               </h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                مجموعة مختارة من أفضل العقارات المتاحة في الإمارات، تم اختيارها بعناية لتناسب جميع الأذواق والميزانيات
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                مجموعة مختارة من أفضل العقارات
               </p>
             </div>
 
@@ -410,19 +346,21 @@ export default function Index() {
                 ))}
               </div>
             ) : featuredProperties.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredProperties.map((property, index) => (
-                  <div key={property.id} className="animate-fade-in hover:animate-scale-in">
-                    <PropertyCard
-                      property={property}
-                      onFavorite={handleFavorite}
-                      onContact={handleContact}
-                      onShare={handleShare}
-                      isFavorited={userWishlist.includes(property.id)}
-                      imageIndex={index}
-                    />
-                  </div>
-                ))}
+              <div className="flex justify-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl">
+                  {featuredProperties.map((property, index) => (
+                    <div key={property.id} className="w-full max-w-sm mx-auto animate-fade-in hover:animate-scale-in">
+                      <PropertyCard
+                        property={property}
+                        onFavorite={handleFavorite}
+                        onContact={handleContact}
+                        onShare={handleShare}
+                        isFavorited={userWishlist.includes(property.id)}
+                        imageIndex={index}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <Card className="p-12 text-center bg-gradient-card backdrop-blur-sm border-0 shadow-strong">
