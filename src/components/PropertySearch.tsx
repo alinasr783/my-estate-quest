@@ -101,7 +101,12 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
   };
 
   const handleSearch = () => {
-    onSearch(filters);
+    // Reset property type to empty string if "all" is selected for category filtering
+    const cleanedFilters = {
+      ...filters,
+      propertyType: filters.propertyType === "all" ? "" : filters.propertyType
+    };
+    onSearch(cleanedFilters);
   };
 
   const getPropertyTypeOptions = () => {
@@ -155,7 +160,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
             <Select
               value={propertyCategory}
               onValueChange={(value) => {
-                setPropertyCategory(value);
+                setPropertyCategory(value === "all" ? "" : value);
                 setFilters({ ...filters, propertyType: "" }); // Reset property type when category changes
               }}
             >
@@ -163,7 +168,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
                 <SelectValue placeholder="اختر فئة العقار" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">جميع الفئات</SelectItem>
+                <SelectItem value="all">جميع الفئات</SelectItem>
                 {PROPERTY_CATEGORIES.map((category) => (
                   <SelectItem key={category.value} value={category.value}>
                     {category.label}
@@ -182,13 +187,13 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
               </Label>
               <Select
                 value={filters.propertyType}
-                onValueChange={(value) => setFilters({ ...filters, propertyType: value })}
+                onValueChange={(value) => setFilters({ ...filters, propertyType: value === "all" ? "" : value })}
               >
                 <SelectTrigger className="bg-background/80">
                   <SelectValue placeholder="اختر نوع العقار" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">جميع الأنواع</SelectItem>
+                  <SelectItem value="all">جميع الأنواع</SelectItem>
                   {getPropertyTypeOptions().map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
