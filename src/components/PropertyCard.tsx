@@ -4,26 +4,22 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Share2, Phone, MessageCircle, MapPin, Bed, Bath, Ruler } from "lucide-react";
 import { useState } from "react";
 
-interface Property {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  currency: string;
-  listing_type: string;
-  property_category: string;
-  property_type: string;
-  location: string;
-  city: string;
-  area_sq_m: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  image_url?: string;
-  is_featured?: boolean;
-}
-
 interface PropertyCardProps {
-  property: Property;
+  property: {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    currency: string;
+    listing_type: string;
+    property_type: string;
+    location: string;
+    city: string;
+    area_sq_m: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    image_url?: string;
+  };
   onFavorite?: (propertyId: string) => void;
   onContact?: (propertyId: string) => void;
   onShare?: (propertyId: string) => void;
@@ -55,13 +51,7 @@ export default function PropertyCard({
 
   return (
     <Card className="group overflow-hidden bg-gradient-card hover:shadow-strong transition-all duration-300 hover:-translate-y-1 border-0">
-      <div className="relative overflow-hidden">
-        {property.is_featured && (
-          <Badge className="absolute top-3 right-3 z-10 bg-gradient-accent text-accent-foreground">
-            مميز
-          </Badge>
-        )}
-        
+      <div className="relative overflow-hidden">        
         <div className="relative h-48 bg-muted">
           {property.image_url && !imageError ? (
             <img
@@ -102,7 +92,7 @@ export default function PropertyCard({
             <Badge variant={property.listing_type === 'للبيع' ? 'default' : 'secondary'}>
               {property.listing_type}
             </Badge>
-            <Badge variant="outline">{property.property_category}</Badge>
+            <Badge variant="outline">{property.property_type}</Badge>
           </div>
           
           <h3 className="font-semibold text-lg leading-tight mb-2 group-hover:text-primary transition-colors">

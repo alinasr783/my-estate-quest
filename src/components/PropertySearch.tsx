@@ -8,7 +8,6 @@ import { Search, MapPin, Home, Building2, Bed, Bath, Ruler } from "lucide-react"
 
 interface SearchFilters {
   listingType: string;
-  propertyCategory: string;
   propertyType: string;
   location: string;
   minPrice: string;
@@ -38,7 +37,6 @@ interface PropertySearchProps {
 export default function PropertySearch({ onSearch }: PropertySearchProps) {
   const [filters, setFilters] = useState<SearchFilters>({
     listingType: "",
-    propertyCategory: "",
     propertyType: "",
     location: "",
     minPrice: "",
@@ -54,7 +52,8 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
   };
 
   const getPropertyTypes = () => {
-    return filters.propertyCategory === "سكني" ? RESIDENTIAL_TYPES : COMMERCIAL_TYPES;
+    // إرجاع جميع الأنواع (سكني وتجاري)
+    return [...RESIDENTIAL_TYPES, ...COMMERCIAL_TYPES];
   };
 
   return (
@@ -85,30 +84,15 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
             </Select>
           </div>
 
-          {/* فئة العقار */}
+          {/* نوع العقار */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
-              فئة العقار
+              نوع العقار
             </Label>
-            <Select value={filters.propertyCategory} onValueChange={(value) => setFilters({...filters, propertyCategory: value, propertyType: ""})}>
-              <SelectTrigger className="bg-background/80">
-                <SelectValue placeholder="سكني أم تجاري" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="سكني">سكني</SelectItem>
-                <SelectItem value="تجاري">تجاري</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* نوع العقار */}
-          <div className="space-y-2">
-            <Label>نوع العقار</Label>
             <Select 
               value={filters.propertyType} 
               onValueChange={(value) => setFilters({...filters, propertyType: value})}
-              disabled={!filters.propertyCategory}
             >
               <SelectTrigger className="bg-background/80">
                 <SelectValue placeholder="اختر نوع العقار" />
@@ -158,69 +142,44 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
             </div>
           </div>
 
-          {/* الغرف والحمامات للسكني أو المساحة للتجاري */}
-          {filters.propertyCategory === "سكني" ? (
-            <div className="space-y-2">
-              <Label>الغرف والحمامات</Label>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Bed className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">غرف النوم</span>
-                  </div>
-                  <Select value={filters.bedrooms} onValueChange={(value) => setFilters({...filters, bedrooms: value})}>
-                    <SelectTrigger className="bg-background/80">
-                      <SelectValue placeholder="غرف" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1,2,3,4,5,6].map(num => (
-                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          {/* المساحة والتفاصيل */}
+          <div className="space-y-2">
+            <Label>الغرف والحمامات</Label>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <div className="flex items-center gap-1 mb-1">
+                  <Bed className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">غرف النوم</span>
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-1 mb-1">
-                    <Bath className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">الحمامات</span>
-                  </div>
-                  <Select value={filters.bathrooms} onValueChange={(value) => setFilters({...filters, bathrooms: value})}>
-                    <SelectTrigger className="bg-background/80">
-                      <SelectValue placeholder="حمامات" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1,2,3,4,5,6].map(num => (
-                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <Select value={filters.bedrooms} onValueChange={(value) => setFilters({...filters, bedrooms: value})}>
+                  <SelectTrigger className="bg-background/80">
+                    <SelectValue placeholder="غرف" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1,2,3,4,5,6].map(num => (
+                      <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-1 mb-1">
+                  <Bath className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">الحمامات</span>
                 </div>
+                <Select value={filters.bathrooms} onValueChange={(value) => setFilters({...filters, bathrooms: value})}>
+                  <SelectTrigger className="bg-background/80">
+                    <SelectValue placeholder="حمامات" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1,2,3,4,5,6].map(num => (
+                      <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          ) : filters.propertyCategory === "تجاري" ? (
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Ruler className="h-4 w-4 text-primary" />
-                المساحة (متر مربع)
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="من"
-                  type="number"
-                  value={filters.minArea}
-                  onChange={(e) => setFilters({...filters, minArea: e.target.value})}
-                  className="bg-background/80"
-                />
-                <Input
-                  placeholder="إلى"
-                  type="number"
-                  value={filters.maxArea}
-                  onChange={(e) => setFilters({...filters, maxArea: e.target.value})}
-                  className="bg-background/80"
-                />
-              </div>
-            </div>
-          ) : <div></div>}
+          </div>
         </div>
 
         <Button 

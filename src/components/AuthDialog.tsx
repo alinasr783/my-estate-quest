@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, User, Phone } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Mail, Lock, UserIcon, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { authService, type User } from "@/services/auth";
 
 interface AuthDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: (user: any) => void;
+  onSuccess: (user: User) => void;
 }
 
 export default function AuthDialog({ open, onOpenChange, onSuccess }: AuthDialogProps) {
@@ -40,32 +40,19 @@ export default function AuthDialog({ open, onOpenChange, onSuccess }: AuthDialog
     setError("");
 
     try {
-      // البحث في جدول المستخدمين المخصص
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', loginForm.email)
-        .single();
-
-      if (userError || !userData) {
-        setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-        return;
-      }
-
-      // هنا يجب التحقق من كلمة المرور (في تطبيق حقيقي نستخدم bcrypt)
-      // للتبسيط، سنتحقق من كلمة المرور مباشرة
-      if (userData.password_hash !== loginForm.password) {
-        setError("البريد الإلكتروني أو كلمة المرور غير صحيحة");
-        return;
-      }
-
-      onSuccess(userData);
-      onOpenChange(false);
+      const result = await authService.login(loginForm.email, loginForm.password);
       
-      toast({
-        title: "تم تسجيل الدخول بنجاح",
-        description: `مرحباً ${userData.first_name || userData.email}`,
-      });
+      if (result.success && result.user) {
+        onSuccess(result.user);
+        onOpenChange(false);
+        
+        toast({
+          title: "تم تسجيل الدخول بنجاح",
+          description: `مرحباً ${result.user.first_name || result.user.email}`,
+        });
+      } else {
+        setError(result.error || "حدث خطأ أثناء تسجيل الدخول");
+      }
 
     } catch (err) {
       setError("حدث خطأ أثناء تسجيل الدخول");
@@ -92,43 +79,25 @@ export default function AuthDialog({ open, onOpenChange, onSuccess }: AuthDialog
     }
 
     try {
-      // التحقق من وجود المستخدم
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('email')
-        .eq('email', registerForm.email)
-        .single();
-
-      if (existingUser) {
-        setError("هذا البريد الإلكتروني مسجل مسبقاً");
-        return;
-      }
-
-      // إنشاء المستخدم الجديد
-      const { data: newUser, error: insertError } = await supabase
-        .from('users')
-        .insert({
-          email: registerForm.email,
-          password_hash: registerForm.password, // في تطبيق حقيقي نستخدم bcrypt
-          first_name: registerForm.firstName,
-          last_name: registerForm.lastName,
-          phone: registerForm.phone
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        setError("حدث خطأ أثناء إنشاء الحساب");
-        return;
-      }
-
-      onSuccess(newUser);
-      onOpenChange(false);
-      
-      toast({
-        title: "تم إنشاء الحساب بنجاح",
-        description: `مرحباً ${newUser.first_name}، يمكنك الآن الاستفادة من جميع الخدمات`,
+      const result = await authService.register({
+        email: registerForm.email,
+        password: registerForm.password,
+        first_name: registerForm.firstName,
+        last_name: registerForm.lastName,
+        phone: registerForm.phone
       });
+
+      if (result.success && result.user) {
+        onSuccess(result.user);
+        onOpenChange(false);
+        
+        toast({
+          title: "تم إنشاء الحساب بنجاح",
+          description: `مرحباً ${result.user.first_name}، يمكنك الآن الاستفادة من جميع الخدمات`,
+        });
+      } else {
+        setError(result.error || "حدث خطأ أثناء إنشاء الحساب");
+      }
 
     } catch (err) {
       setError("حدث خطأ أثناء إنشاء الحساب");
@@ -208,7 +177,7 @@ export default function AuthDialog({ open, onOpenChange, onSuccess }: AuthDialog
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="first-name" className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-primary" />
+                    <UserIcon className="h-4 w-4 text-primary" />
                     الاسم الأول
                   </Label>
                   <Input
