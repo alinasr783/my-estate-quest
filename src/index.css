@@ -2,41 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* نظام التصميم للموقع العقاري - جميع الألوان والتدرجات والخطوط
+جميع الألوان يجب أن تكون HSL
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 98%;
+    --foreground: 210 24% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 24% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 24% 16%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* ألوان العقارات الفاخرة */
+    --primary: 210 100% 50%; /* أزرق فاخر */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 210 100% 92%;
+    --primary-dark: 210 100% 40%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 210 24% 16%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* اللون الذهبي للعناصر المميزة */
+    --accent: 45 93% 47%; /* ذهبي فاخر */
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 45 93% 95%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 210 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* التدرجات الفاخرة */
+    --gradient-primary: linear-gradient(135deg, hsl(210 100% 50%), hsl(220 100% 40%));
+    --gradient-accent: linear-gradient(135deg, hsl(45 93% 47%), hsl(35 91% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 100% 50%) 0%, hsl(220 100% 40%) 50%, hsl(45 93% 47%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+
+    /* الظلال الأنيقة */
+    --shadow-soft: 0 2px 10px -2px hsl(210 40% 8% / 0.04);
+    --shadow-medium: 0 8px 30px -12px hsl(210 40% 8% / 0.15);
+    --shadow-strong: 0 32px 64px -12px hsl(210 40% 8% / 0.25);
+    --shadow-glow: 0 0 40px hsl(210 100% 50% / 0.15);
+
+    /* الحركات الناعمة */
+    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 
     --sidebar-background: 0 0% 98%;
 
