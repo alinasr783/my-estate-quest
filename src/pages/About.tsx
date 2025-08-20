@@ -46,10 +46,10 @@ export default function About() {
       <section className="bg-gradient-primary text-primary-foreground py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            {contentData.about_title || "من نحن"}
+            {contentData?.about_title || "من نحن"}
           </h1>
           <p className="text-xl text-primary-foreground/90 max-w-3xl mx-auto leading-relaxed">
-            {contentData.about_description || "نحن شركة رائدة في مجال العقارات في دولة الإمارات العربية المتحدة، نقدم خدمات متميزة في البيع والشراء والإيجار"}
+            {contentData?.about_description || "نحن شركة رائدة في مجال العقارات في دولة الإمارات العربية المتحدة، نقدم خدمات متميزة في البيع والشراء والإيجار"}
           </p>
         </div>
       </section>
@@ -144,10 +144,10 @@ export default function About() {
       <section className="py-16 bg-gradient-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            {contentData.cta_title || "ابدأ رحلتك معنا"}
+            {contentData?.cta_title || "ابدأ رحلتك معنا"}
           </h2>
           <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            {contentData.cta_subtitle || "اتصل بنا الآن للحصول على استشارة مجانية"}
+            {contentData?.cta_subtitle || "اتصل بنا الآن للحصول على استشارة مجانية"}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-white/90 transition-all duration-300">
@@ -160,7 +160,7 @@ export default function About() {
         </div>
       </section>
 
-      <Footer />
+      <Footer onAdminClick={() => {}} />
     </div>
   );
 }

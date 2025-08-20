@@ -25,9 +25,17 @@ interface FooterInfo {
   }>;
 }
 
+interface ContentData {
+  about_title: string;
+  about_description: string;
+  cta_title: string;
+  cta_subtitle: string;
+}
+
 export const useSiteSettings = () => {
   const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
   const [footerInfo, setFooterInfo] = useState<FooterInfo | null>(null);
+  const [contentData, setContentData] = useState<ContentData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +47,7 @@ export const useSiteSettings = () => {
       const { data, error } = await supabase
         .from('site_settings')
         .select('key, value')
-        .in('key', ['contact_info', 'footer_info']);
+        .in('key', ['contact_info', 'footer_info', 'content_data']);
 
       if (error) throw error;
 
@@ -48,6 +56,8 @@ export const useSiteSettings = () => {
           setContactInfo(item.value as unknown as ContactInfo);
         } else if (item.key === 'footer_info') {
           setFooterInfo(item.value as unknown as FooterInfo);
+        } else if (item.key === 'content_data') {
+          setContentData(item.value as unknown as ContentData);
         }
       });
     } catch (error) {
@@ -60,6 +70,7 @@ export const useSiteSettings = () => {
   return {
     contactInfo,
     footerInfo,
+    contentData,
     loading,
     refetch: loadSiteSettings
   };

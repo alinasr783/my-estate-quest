@@ -166,8 +166,8 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">الهاتف</h3>
-                      <p className="text-muted-foreground">{contactInfo.phone || "+971 50 123 4567"}</p>
-                      <p className="text-muted-foreground">{contactInfo.whatsapp || "+971 50 123 4567"}</p>
+                      <p className="text-muted-foreground">{contactInfo?.phone || "+971 50 123 4567"}</p>
+                      <p className="text-muted-foreground">{contactInfo?.whatsapp || "+971 50 123 4567"}</p>
                     </div>
                   </div>
 
@@ -177,7 +177,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">البريد الإلكتروني</h3>
-                      <p className="text-muted-foreground">{contactInfo.email || "info@realestate.com"}</p>
+                      <p className="text-muted-foreground">{contactInfo?.email || "info@realestate.com"}</p>
                     </div>
                   </div>
 
@@ -187,7 +187,7 @@ export default function Contact() {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-1">العنوان</h3>
-                      <p className="text-muted-foreground">{contactInfo.address || "دبي، الإمارات العربية المتحدة"}</p>
+                      <p className="text-muted-foreground">{contactInfo?.address || "دبي، الإمارات العربية المتحدة"}</p>
                     </div>
                   </div>
 
@@ -220,7 +220,7 @@ export default function Contact() {
         </div>
       </section>
 
-      <Footer />
+      <Footer onAdminClick={() => {}} />
     </div>
   );
 }
