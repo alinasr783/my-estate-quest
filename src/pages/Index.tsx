@@ -86,8 +86,7 @@ export default function Index() {
     try {
       let query = supabase
         .from('properties')
-        .select('id, title, description, price, currency, listing_type, property_type, location, city, area_sq_m, bedrooms, bathrooms')
-        .eq('status', 'active');
+        .select('*');
 
       // تطبيق الفلاتر
       if (filters.listingType) {
