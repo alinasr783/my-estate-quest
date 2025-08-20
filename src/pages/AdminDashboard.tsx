@@ -9,18 +9,23 @@ import { adminAuthService } from "@/services/adminAuth";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AddPropertyForm from "@/components/AddPropertyForm";
-import { BarChart3, Download, Users, Eye, Calendar, ArrowLeft, Plus } from "lucide-react";
+import SiteDataManager from "@/components/SiteDataManager";
+import { BarChart3, Download, Users, Eye, Calendar, ArrowLeft, Plus, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminDashboard() {
   const [visits, setVisits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddProperty, setShowAddProperty] = useState(false);
+  const [showSiteDataManager, setShowSiteDataManager] = useState(false);
+  const [properties, setProperties] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalVisits: 0,
     uniqueUsers: 0,
     todayVisits: 0,
-    topProperties: []
+    topProperties: [],
+    totalProperties: 0
   });
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -33,7 +38,22 @@ export default function AdminDashboard() {
     }
     
     loadAnalytics();
+    loadProperties();
   }, [navigate]);
+
+  const loadProperties = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (error) {
+      console.error('Error loading properties:', error);
+    }
+  };
 
   const loadAnalytics = async () => {
     setLoading(true);
@@ -92,7 +112,8 @@ export default function AdminDashboard() {
       totalVisits: visitsData.length,
       uniqueUsers,
       todayVisits,
-      topProperties
+      topProperties,
+      totalProperties: properties.length
     });
   };
 
@@ -158,8 +179,25 @@ export default function AdminDashboard() {
             onSuccess={() => {
               setShowAddProperty(false);
               loadAnalytics();
+              loadProperties();
             }}
             onCancel={() => setShowAddProperty(false)}
+          />
+        </div>
+        
+        <Footer onAdminClick={() => {}} />
+      </div>
+    );
+  }
+
+  if (showSiteDataManager) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onLoginClick={() => {}} />
+        
+        <div className="container mx-auto px-4 py-8">
+          <SiteDataManager
+            onCancel={() => setShowSiteDataManager(false)}
           />
         </div>
         
@@ -194,6 +232,14 @@ export default function AdminDashboard() {
               إضافة عقار
             </Button>
             <Button 
+              onClick={() => setShowSiteDataManager(true)}
+              variant="outline"
+              className="hover-scale"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              إدارة البيانات
+            </Button>
+            <Button 
               onClick={handleExportToExcel}
               className="bg-gradient-primary hover:bg-gradient-accent hover-scale"
             >
@@ -207,7 +253,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* إحصائيات سريعة */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="animate-fade-in hover-scale transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">إجمالي الزيارات</CardTitle>
@@ -245,6 +291,16 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{new Set(visits.map(v => v.property_id)).size}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="animate-fade-in hover-scale transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">إجمالي العقارات</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalProperties}</div>
             </CardContent>
           </Card>
         </div>

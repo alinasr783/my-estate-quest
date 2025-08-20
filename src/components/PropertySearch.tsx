@@ -95,10 +95,10 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
   const handleSearch = () => {
     const cleanedFilters = {
       ...filters,
-      propertyType: filters.propertyType === "جميع الأنواع" ? "" : filters.propertyType,
-      listingType: filters.listingType === "الكل" ? "" : filters.listingType,
-      bedrooms: filters.bedrooms === "أي عدد" ? "" : filters.bedrooms,
-      bathrooms: filters.bathrooms === "أي عدد" ? "" : filters.bathrooms
+      propertyType: filters.propertyType === "all_property_types" ? "" : filters.propertyType,
+      listingType: filters.listingType === "all_types" ? "" : filters.listingType,
+      bedrooms: filters.bedrooms === "any_bedrooms" ? "" : filters.bedrooms,
+      bathrooms: filters.bathrooms === "any_bathrooms" ? "" : filters.bathrooms
     };
     onSearch(cleanedFilters);
   };
@@ -134,7 +134,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
                   <SelectValue placeholder="للبيع أو للإيجار" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="الكل">الكل</SelectItem>
+                  <SelectItem value="all_types">الكل</SelectItem>
                   <SelectItem value="للبيع">للبيع</SelectItem>
                   <SelectItem value="للإيجار">للإيجار</SelectItem>
                 </SelectContent>
@@ -150,7 +150,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
               <Select
                 value={propertyCategory}
                 onValueChange={(value) => {
-                  setPropertyCategory(value === "جميع الفئات" ? "" : value);
+                  setPropertyCategory(value === "all_categories" ? "" : value);
                   setFilters({ ...filters, propertyType: "" });
                 }}
               >
@@ -158,7 +158,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
                   <SelectValue placeholder="سكني أو تجاري" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="جميع الفئات">جميع الفئات</SelectItem>
+                  <SelectItem value="all_categories">جميع الفئات</SelectItem>
                   {PROPERTY_CATEGORIES.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       {category.label}
@@ -176,14 +176,14 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
               </Label>
               <Select
                 value={filters.propertyType}
-                onValueChange={(value) => setFilters({ ...filters, propertyType: value === "جميع الأنواع" ? "" : value })}
+                onValueChange={(value) => setFilters({ ...filters, propertyType: value === "all_property_types" ? "" : value })}
                 disabled={!propertyCategory}
               >
                 <SelectTrigger className="h-14 bg-background border-2 hover:border-primary/50 transition-colors text-lg hover-scale">
                   <SelectValue placeholder={propertyCategory ? "اختر النوع" : "اختر الفئة أولاً"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="جميع الأنواع">جميع الأنواع</SelectItem>
+                  <SelectItem value="all_property_types">جميع الأنواع</SelectItem>
                   {getPropertyTypeOptions().map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
@@ -219,7 +219,7 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
                     <CommandEmpty>لم يتم العثور على مواقع.</CommandEmpty>
                     <CommandGroup className="max-h-64 overflow-auto">
                       <CommandItem
-                        value="جميع المواقع"
+                        value="all_locations"
                         onSelect={() => {
                           setFilters({...filters, location: ""});
                           setLocationOpen(false);
@@ -280,12 +280,12 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
 
             <div className="space-y-3 animate-fade-in">
               <Label className="text-foreground font-semibold text-base">غرف النوم</Label>
-              <Select value={filters.bedrooms} onValueChange={(value) => setFilters({...filters, bedrooms: value === "أي عدد" ? "" : value})}>
+              <Select value={filters.bedrooms} onValueChange={(value) => setFilters({...filters, bedrooms: value === "any_bedrooms" ? "" : value})}>
                 <SelectTrigger className="h-14 bg-background border-2 hover:border-primary/50 transition-colors text-lg hover-scale">
                   <SelectValue placeholder="أي عدد" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="أي عدد">أي عدد</SelectItem>
+                  <SelectItem value="any_bedrooms">أي عدد</SelectItem>
                   <SelectItem value="1">1</SelectItem>
                   <SelectItem value="2">2</SelectItem>
                   <SelectItem value="3">3</SelectItem>
@@ -297,12 +297,12 @@ export default function PropertySearch({ onSearch }: PropertySearchProps) {
 
             <div className="space-y-3 animate-fade-in">
               <Label className="text-foreground font-semibold text-base">الحمامات</Label>
-              <Select value={filters.bathrooms} onValueChange={(value) => setFilters({...filters, bathrooms: value === "أي عدد" ? "" : value})}>
+              <Select value={filters.bathrooms} onValueChange={(value) => setFilters({...filters, bathrooms: value === "any_bathrooms" ? "" : value})}>
                 <SelectTrigger className="h-14 bg-background border-2 hover:border-primary/50 transition-colors text-lg hover-scale">
                   <SelectValue placeholder="أي عدد" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="أي عدد">أي عدد</SelectItem>
+                  <SelectItem value="any_bathrooms">أي عدد</SelectItem>
                   <SelectItem value="1">1</SelectItem>
                   <SelectItem value="2">2</SelectItem>
                   <SelectItem value="3">3</SelectItem>

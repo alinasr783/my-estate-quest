@@ -1,150 +1,137 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Phone, Mail, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Building2, Facebook, Instagram, Twitter, Linkedin, Phone, Mail, MapPin, Clock } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface FooterProps {
   onAdminClick: () => void;
 }
 
 export default function Footer({ onAdminClick }: FooterProps) {
+  const { contactInfo, footerInfo, loading } = useSiteSettings();
+
+  if (loading || !contactInfo || !footerInfo) {
+    return (
+      <footer className="bg-card border-t animate-fade-in">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center animate-pulse-slow">جاري تحميل معلومات التواصل...</div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
-    <footer className="bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+    <footer className="bg-gradient-to-br from-slate-900 to-slate-800 text-white animate-fade-in">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* معلومات الشركة */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-accent rounded-lg flex items-center justify-center">
-                <Home className="h-6 w-6 text-accent-foreground" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">العقارات الذهبية</h3>
-                <p className="text-sm text-gray-300">شركة التسويق العقاري</p>
-              </div>
+          <div className="animate-slide-in-left">
+            <div className="flex items-center gap-2 mb-4">
+              <Building2 className="h-6 w-6 text-primary animate-glow" />
+              <h3 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+                {contactInfo.company_name}
+              </h3>
             </div>
-            <p className="text-gray-300 text-sm leading-relaxed">
-              نحن شركة رائدة في مجال التسويق العقاري في دولة الإمارات العربية المتحدة، 
-              نقدم أفضل الخدمات العقارية والاستشارات المتخصصة لعملائنا الكرام.
+            <p className="text-muted-foreground mb-4">
+              {footerInfo.about_text}
             </p>
+            <div className="flex gap-4">
+              {contactInfo.social_media.facebook && (
+                <a href={contactInfo.social_media.facebook} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors hover-scale">
+                  <Facebook className="h-5 w-5" />
+                </a>
+              )}
+              {contactInfo.social_media.instagram && (
+                <a href={contactInfo.social_media.instagram} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors hover-scale">
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
+              {contactInfo.social_media.twitter && (
+                <a href={contactInfo.social_media.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors hover-scale">
+                  <Twitter className="h-5 w-5" />
+                </a>
+              )}
+              {contactInfo.social_media.linkedin && (
+                <a href={contactInfo.social_media.linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors hover-scale">
+                  <Linkedin className="h-5 w-5" />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* خدماتنا */}
+          <div className="animate-fade-in">
+            <h3 className="text-lg font-semibold mb-4 text-white">خدماتنا</h3>
+            <ul className="space-y-2">
+              {footerInfo.services.map((service, index) => (
+                <li key={index}>
+                  <a href="#" className="text-gray-300 hover:text-primary transition-colors story-link hover-scale">
+                    {service}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* روابط سريعة */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white border-b border-accent pb-2">
-              روابط سريعة
-            </h4>
+          <div className="animate-slide-in-right">
+            <h3 className="text-lg font-semibold mb-4 text-white">روابط سريعة</h3>
             <ul className="space-y-2">
+              {footerInfo.quick_links.map((link, index) => (
+                <li key={index}>
+                  <a href={link.url} className="text-gray-300 hover:text-primary transition-colors story-link hover-scale">
+                    {link.title}
+                  </a>
+                </li>
+              ))}
               <li>
-                <Link to="/" className="text-gray-300 hover:text-accent transition-colors text-sm">
-                  الرئيسية
-                </Link>
-              </li>
-              <li>
-                <Link to="/properties" className="text-gray-300 hover:text-accent transition-colors text-sm">
-                  العقارات
-                </Link>
-              </li>
-              <li>
-                <Link to="/featured" className="text-gray-300 hover:text-accent transition-colors text-sm">
-                  أفضل العقارات
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-gray-300 hover:text-accent transition-colors text-sm">
-                  من نحن
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-300 hover:text-accent transition-colors text-sm">
-                  تواصل معنا
-                </Link>
+                <button 
+                  onClick={onAdminClick}
+                  className="text-gray-300 hover:text-primary transition-colors story-link text-left hover-scale"
+                >
+                  لوحة الإدارة
+                </button>
               </li>
             </ul>
           </div>
 
-          {/* معلومات التواصل */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white border-b border-accent pb-2">
-              تواصل معنا
-            </h4>
+          {/* معلومات الاتصال */}
+          <div className="animate-fade-in">
+            <h3 className="text-lg font-semibold mb-4 text-white">تواصل معنا</h3>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3 space-x-reverse text-sm">
-                <Phone className="h-4 w-4 text-accent flex-shrink-0" />
-                <span className="text-gray-300">+971 50 123 4567</span>
+              <div className="flex items-center gap-2 hover-scale">
+                <Phone className="h-4 w-4 text-primary animate-bounce-subtle" />
+                <a href={`tel:${contactInfo.phone}`} className="text-gray-300 hover:text-primary transition-colors">
+                  {contactInfo.phone}
+                </a>
               </div>
-              <div className="flex items-center space-x-3 space-x-reverse text-sm">
-                <Mail className="h-4 w-4 text-accent flex-shrink-0" />
-                <span className="text-gray-300">info@goldrealestate.ae</span>
+              <div className="flex items-center gap-2 hover-scale">
+                <Mail className="h-4 w-4 text-primary" />
+                <a href={`mailto:${contactInfo.email}`} className="text-gray-300 hover:text-primary transition-colors">
+                  {contactInfo.email}
+                </a>
               </div>
-              <div className="flex items-start space-x-3 space-x-reverse text-sm">
-                <MapPin className="h-4 w-4 text-accent flex-shrink-0 mt-0.5" />
-                <span className="text-gray-300">
-                  دبي، الإمارات العربية المتحدة<br />
-                  مركز دبي التجاري، الطابق 15
-                </span>
+              <div className="flex items-start gap-2 hover-scale">
+                <MapPin className="h-4 w-4 text-primary mt-1" />
+                <p className="text-gray-300">
+                  {contactInfo.address}
+                </p>
               </div>
-            </div>
-          </div>
-
-          {/* وسائل التواصل الاجتماعي */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-white border-b border-accent pb-2">
-              تابعنا
-            </h4>
-            <div className="flex space-x-3 space-x-reverse">
-              <Button variant="ghost" size="icon" className="text-gray-300 hover:text-accent hover:bg-accent/10">
-                <Facebook className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-300 hover:text-accent hover:bg-accent/10">
-                <Twitter className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-300 hover:text-accent hover:bg-accent/10">
-                <Instagram className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-300 hover:text-accent hover:bg-accent/10">
-                <Linkedin className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            <div className="pt-4">
-              <p className="text-sm text-gray-400 mb-2">اشترك في النشرة الإخبارية</p>
-              <div className="flex space-x-2 space-x-reverse">
-                <input 
-                  type="email" 
-                  placeholder="بريدك الإلكتروني"
-                  className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-sm focus:outline-none focus:border-accent text-right"
-                />
-                <Button size="sm" className="bg-gradient-accent hover:bg-accent/90">
-                  اشترك
-                </Button>
+              <div className="flex items-center gap-2 hover-scale">
+                <Clock className="h-4 w-4 text-primary" />
+                <p className="text-gray-300">
+                  {contactInfo.working_hours}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* الخط السفلي */}
-        <div className="border-t border-gray-700 mt-8 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-sm text-gray-400 text-center md:text-right">
-              © 2024 العقارات الذهبية. جميع الحقوق محفوظة.
-            </p>
-            
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <Link to="/privacy" className="text-sm text-gray-400 hover:text-accent transition-colors">
-                سياسة الخصوصية
-              </Link>
-              <Link to="/terms" className="text-sm text-gray-400 hover:text-accent transition-colors">
-                الشروط والأحكام
-              </Link>
-              <Button 
-                variant="link" 
-                onClick={onAdminClick}
-                className="text-xs text-gray-500 hover:text-accent p-0 h-auto"
-              >
-                Are you the admin?
-              </Button>
-            </div>
-          </div>
+        {/* Copyright */}
+        <div className="border-t border-gray-700 mt-12 pt-8 text-center animate-fade-in">
+          <p className="text-gray-400">
+            © 2024 {contactInfo.company_name}. جميع الحقوق محفوظة.
+          </p>
         </div>
       </div>
     </footer>
