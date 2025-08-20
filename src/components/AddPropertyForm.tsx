@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Building2, DollarSign, MapPin, Home, Phone, Mail, Car, Waves, TreePine, Shield, Dumbbell, MoveVertical, Snowflake, Sofa } from "lucide-react";
+import { Loader2, Plus, Building2, DollarSign, MapPin, Home, Phone, Mail, Car, Waves, TreePine, Shield, Dumbbell, MoveVertical, Snowflake, Sofa, Upload, X } from "lucide-react";
 
 interface PropertyFormData {
   title: string;
@@ -58,6 +58,8 @@ interface AddPropertyFormProps {
 export default function AddPropertyForm({ onSuccess, onCancel }: AddPropertyFormProps) {
   const [loading, setLoading] = useState(false);
   const [propertyCategory, setPropertyCategory] = useState<string>("");
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<{ file: File; url: string; uploaded: boolean }[]>([]);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState<PropertyFormData>({
@@ -97,6 +99,61 @@ export default function AddPropertyForm({ onSuccess, onCancel }: AddPropertyForm
     return [];
   };
 
+  const handleImageUpload = async (files: FileList) => {
+    setUploadingImages(true);
+    const newImages: { file: File; url: string; uploaded: boolean }[] = [];
+
+    for (const file of Array.from(files)) {
+      if (file.type.startsWith('image/')) {
+        newImages.push({
+          file,
+          url: URL.createObjectURL(file),
+          uploaded: false
+        });
+      }
+    }
+
+    setUploadedImages(prev => [...prev, ...newImages]);
+
+    // رفع الصور إلى Supabase Storage
+    for (let i = 0; i < newImages.length; i++) {
+      const image = newImages[i];
+      const fileName = `${Date.now()}-${image.file.name}`;
+      
+      try {
+        const { data, error } = await supabase.storage
+          .from('property-images')
+          .upload(fileName, image.file);
+
+        if (error) throw error;
+
+        // الحصول على الرابط المباشر
+        const { data: urlData } = supabase.storage
+          .from('property-images')
+          .getPublicUrl(fileName);
+
+        // تحديث حالة الصورة
+        setUploadedImages(prev => prev.map((img, index) => 
+          img === image ? { ...img, url: urlData.publicUrl, uploaded: true } : img
+        ));
+
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast({
+          title: "خطأ في رفع الصورة",
+          description: `فشل في رفع الصورة: ${image.file.name}`,
+          variant: "destructive",
+        });
+      }
+    }
+    
+    setUploadingImages(false);
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -111,7 +168,8 @@ export default function AddPropertyForm({ onSuccess, onCancel }: AddPropertyForm
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      // إضافة العقار أولاً
+      const { data: propertyData, error: propertyError } = await supabase
         .from('properties')
         .insert({
           title: formData.title,
@@ -138,13 +196,31 @@ export default function AddPropertyForm({ onSuccess, onCancel }: AddPropertyForm
           floor_number: formData.floor_number ? parseInt(formData.floor_number) : null,
           total_floors: formData.total_floors ? parseInt(formData.total_floors) : null,
           year_built: formData.year_built ? parseInt(formData.year_built) : null,
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (propertyError) throw propertyError;
+
+      // إضافة الصور إلى جدول property_images
+      if (uploadedImages.length > 0 && propertyData) {
+        const imagePromises = uploadedImages
+          .filter(img => img.uploaded)
+          .map((img, index) => 
+            supabase.from('property_images').insert({
+              property_id: propertyData.id,
+              path: img.url,
+              public_url: img.url,
+              order: index
+            })
+          );
+
+        await Promise.all(imagePromises);
+      }
 
       toast({
         title: "نجح الإضافة",
-        description: "تم إضافة العقار بنجاح",
+        description: "تم إضافة العقار والصور بنجاح",
       });
       
       onSuccess();
@@ -405,6 +481,72 @@ export default function AddPropertyForm({ onSuccess, onCancel }: AddPropertyForm
                   </Label>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* صور العقار */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              صور العقار
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                <Input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => e.target.files && handleImageUpload(e.target.files)}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <Label 
+                  htmlFor="image-upload" 
+                  className="cursor-pointer flex flex-col items-center gap-3"
+                >
+                  <Upload className="h-10 w-10 text-muted-foreground" />
+                  <div>
+                    <p className="text-lg font-medium">اضغط لرفع الصور</p>
+                    <p className="text-sm text-muted-foreground">يمكنك رفع عدة صور معاً</p>
+                  </div>
+                </Label>
+              </div>
+
+              {uploadingImages && (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  جاري رفع الصور...
+                </div>
+              )}
+
+              {uploadedImages.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {uploadedImages.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={image.url}
+                        alt={`صورة ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-lg border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                      {!image.uploaded && (
+                        <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
+                          <Loader2 className="h-4 w-4 text-white animate-spin" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

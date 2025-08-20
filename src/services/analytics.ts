@@ -77,20 +77,24 @@ export const analyticsService = {
 
   // تصدير البيانات إلى Excel (سيتم تنفيذه في الواجهة)
   exportToExcel(visits: any[]): string {
-    const headers = ['التاريخ', 'العقار', 'السعر', 'الموقع', 'النوع', 'البريد الإلكتروني', 'الاسم'];
-    const csvContent = [
-      headers.join(','),
-      ...visits.map(visit => [
-        new Date(visit.visit_timestamp).toLocaleDateString('ar-SA'),
-        visit.properties?.title || '',
-        visit.properties?.price || '',
-        visit.properties?.location || '',
-        visit.properties?.property_type || '',
-        visit.user_email || '',
-        visit.user_name || ''
-      ].map(field => `"${field}"`).join(','))
-    ].join('\n');
-
+    // تصدير Excel بالإنجليزية لتجنب مشاكل الترميز
+    const headers = ['Date', 'Property', 'User', 'Email', 'Location', 'Price'];
+    
+    const rows = visits.map(visit => [
+      new Date(visit.visit_timestamp).toLocaleDateString('en-US'),
+      visit.properties?.title || 'Deleted Property',
+      visit.user_name || 'Guest',
+      visit.user_email || 'Not Registered',
+      visit.properties?.location || '-',
+      visit.properties?.price ? `${Number(visit.properties.price).toLocaleString()} AED` : '-'
+    ]);
+    
+    // إضافة BOM للتعامل مع UTF-8 بشكل صحيح
+    const BOM = '\uFEFF';
+    const csvContent = BOM + [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\r\n');
+    
     return csvContent;
   }
 };

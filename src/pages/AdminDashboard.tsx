@@ -10,15 +10,17 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AddPropertyForm from "@/components/AddPropertyForm";
 import SiteDataManager from "@/components/SiteDataManager";
-import { BarChart3, Download, Users, Eye, Calendar, ArrowLeft, Plus, Settings } from "lucide-react";
+import UserManagement from "@/components/UserManagement";
+import ContentManagement from "@/components/ContentManagement";
+import SiteSettings from "@/components/SiteSettings";
+import { BarChart3, Download, Users, Eye, Calendar, ArrowLeft, Plus, Settings, FileText, Palette, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function AdminDashboard() {
   const [visits, setVisits] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAddProperty, setShowAddProperty] = useState(false);
-  const [showSiteDataManager, setShowSiteDataManager] = useState(false);
+  const [currentView, setCurrentView] = useState<'dashboard' | 'addProperty' | 'siteData' | 'users' | 'content' | 'settings'>('dashboard');
   const [properties, setProperties] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalVisits: 0,
@@ -175,7 +177,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (showAddProperty) {
+  if (currentView === 'addProperty') {
     return (
       <div className="min-h-screen bg-background">
         <Header onLoginClick={() => {}} />
@@ -183,11 +185,11 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-8">
           <AddPropertyForm
             onSuccess={() => {
-              setShowAddProperty(false);
+              setCurrentView('dashboard');
               loadAnalytics();
               loadProperties();
             }}
-            onCancel={() => setShowAddProperty(false)}
+            onCancel={() => setCurrentView('dashboard')}
           />
         </div>
         
@@ -196,17 +198,47 @@ export default function AdminDashboard() {
     );
   }
 
-  if (showSiteDataManager) {
+  if (currentView === 'siteData') {
     return (
       <div className="min-h-screen bg-background">
         <Header onLoginClick={() => {}} />
         
         <div className="container mx-auto px-4 py-8">
           <SiteDataManager
-            onCancel={() => setShowSiteDataManager(false)}
+            onCancel={() => setCurrentView('dashboard')}
           />
         </div>
         
+        <Footer onAdminClick={() => {}} />
+      </div>
+    );
+  }
+
+  if (currentView === 'users') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onLoginClick={() => {}} />
+        <UserManagement onBack={() => setCurrentView('dashboard')} />
+        <Footer onAdminClick={() => {}} />
+      </div>
+    );
+  }
+
+  if (currentView === 'content') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onLoginClick={() => {}} />
+        <ContentManagement onBack={() => setCurrentView('dashboard')} />
+        <Footer onAdminClick={() => {}} />
+      </div>
+    );
+  }
+
+  if (currentView === 'settings') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onLoginClick={() => {}} />
+        <SiteSettings onBack={() => setCurrentView('dashboard')} />
         <Footer onAdminClick={() => {}} />
       </div>
     );
@@ -229,21 +261,45 @@ export default function AdminDashboard() {
               <p className="text-muted-foreground">تحليلات زيارات العقارات</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button 
-              onClick={() => setShowAddProperty(true)}
+              onClick={() => setCurrentView('addProperty')}
               className="bg-gradient-primary hover:bg-gradient-accent animate-fade-in hover-scale"
             >
               <Plus className="h-4 w-4 mr-2" />
               إضافة عقار
             </Button>
             <Button 
-              onClick={() => setShowSiteDataManager(true)}
+              onClick={() => setCurrentView('users')}
+              variant="outline"
+              className="hover-scale"
+            >
+              <UserCog className="h-4 w-4 mr-2" />
+              إدارة المستخدمين
+            </Button>
+            <Button 
+              onClick={() => setCurrentView('content')}
+              variant="outline"
+              className="hover-scale"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              إدارة المحتوى
+            </Button>
+            <Button 
+              onClick={() => setCurrentView('settings')}
+              variant="outline"
+              className="hover-scale"
+            >
+              <Palette className="h-4 w-4 mr-2" />
+              إعدادات الموقع
+            </Button>
+            <Button 
+              onClick={() => setCurrentView('siteData')}
               variant="outline"
               className="hover-scale"
             >
               <Settings className="h-4 w-4 mr-2" />
-              إدارة البيانات
+              معلومات التواصل
             </Button>
             <Button 
               onClick={handleExportToExcel}
